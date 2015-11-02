@@ -11,6 +11,8 @@ import UIKit
 class RandomUserViewController: UIViewController
 {
 	
+	//	MARK: Properties
+	
 	@IBOutlet weak var largePhoto: UIImageView!
 	@IBOutlet weak var titleLabel: UILabel!
 	@IBOutlet weak var firstLastLabel: UILabel!
@@ -27,6 +29,8 @@ class RandomUserViewController: UIViewController
 	//	Set by the PeopleListViewController
 	var user: RandomUser?
 	
+	
+	//	Load the view and initialize all properties (i.e. initialize the name, photo etc...)
     override func viewDidLoad()
 	{
         super.viewDidLoad()

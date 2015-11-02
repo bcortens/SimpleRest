@@ -11,6 +11,7 @@ import UIKit
 class PeopleListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource
 {
 	//	MARK: Properties
+	
 	var usersList: [RandomUser] = []
 	//	Storyboard
 	@IBOutlet weak var userTableView: UITableView!
@@ -24,14 +25,12 @@ class PeopleListViewController: UIViewController, UITableViewDelegate, UITableVi
 		self.userTableView.delegate = self
 		self.userTableView.dataSource = self
 		
+		//	The User manager is the connection manager which connects to the remote server and is also responsible for handling the results
 		let newUserManager: RandomUserManager = RandomUserManager()
+		//	Set the parent view controller of the user manager
 		newUserManager.parentViewController = self
+		//	Get some random users (15 of them to be specific)
 		newUserManager.getMultipleRandomUsers(15)
-		
-		
-//		print("Created random user")
-//		newUserManager.getOneRandomUser()
-		
 		
 	}
 	
@@ -50,6 +49,8 @@ class PeopleListViewController: UIViewController, UITableViewDelegate, UITableVi
 		// Dispose of any resources that can be recreated.
 	}
 	
+	
+	
 	// MARK: - Table view data source
 	
 	//	Configure the cells
@@ -58,8 +59,10 @@ class PeopleListViewController: UIViewController, UITableViewDelegate, UITableVi
 		let cellIdentifier = "PersonCell"
 		let cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier, forIndexPath: indexPath) as! RandomUserTableViewCell
 		
+		//	Get the user from the usersList
 		let user = self.usersList[indexPath.row]
 		
+		//	Generate the name for display
 		var nameField = ""
 		if(user.firstName != nil)
 		{
@@ -73,9 +76,9 @@ class PeopleListViewController: UIViewController, UITableViewDelegate, UITableVi
 			}
 			nameField = nameField + user.lastName!
 		}
-		//print("Name \(nameField)")
 		cell.userNameLabel.text = nameField
 		
+		//	Load the photo for the user
 		if(user.smallPictureURL != nil)
 		{
 			let imgURL = NSURL(string: user.smallPictureURL!)
@@ -107,9 +110,11 @@ class PeopleListViewController: UIViewController, UITableViewDelegate, UITableVi
 		
 		if segue.identifier == "ShowDetail"
 		{
+			//	Get the detail view controller
 			let userDetailViewController = segue.destinationViewController as! RandomUserViewController
 			
 			// Get the cell that generated this segue.
+			//	Get the appropriate RandomUser item set it in the RandomUserViewController
 			if let selectedUserCell = sender as? RandomUserTableViewCell
 			{
 				if(self.usersList.isEmpty == false)

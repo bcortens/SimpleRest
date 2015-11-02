@@ -12,20 +12,26 @@ import UIKit
 //
 //	This class is responsible for connecting to, and parsing responses from, the RandomUser API
 //	https://randomuser.me/
-//
+//	Uses NSURLSession and NSURLRequest directly rather than relying upon a higher level framework
+//	Uses a block to handle the responses to the data requests
 class RandomUserManager
 {
+	//	MARK: Constants
 	let randomUserBaseURL = "http://api.randomuser.me/"
+
+	
+	//	MARK: Properties
+	
 	var dataResponse: NSData?
 	var usersResponse: [RandomUser]?
 	var parentViewController: PeopleListViewController?
-///	do{
-//	let jsonInformation =
-//	}
 	
+	
+	//	MARK: Getters for outside classes
+	
+	//	Uses performHttpGet to get a single random user from the RandomUserAPI
 	func getOneRandomUser()
 	{
-		print("Get One Random User")
 		self.performHttpGet(self.randomUserBaseURL, number: nil)
 	}
 	
@@ -34,9 +40,17 @@ class RandomUserManager
 		self.performHttpGet(self.randomUserBaseURL, number: String(number))
 	}
 	
+	
+	
+	//	MARK: HTTP Calls
+	
+	//	Get random user (one or more)
 	func performHttpGet(urlString: String, number: String?)
 	{
 		var request: NSMutableURLRequest!
+		
+		//	If requesting more than one user append the results optional parameter and the number of results to get
+		//	Can get up to 1000 random users
 		if(number?.isEmpty == false)
 		{
 			let newURLString = urlString + "?results=" + number!
@@ -46,12 +60,14 @@ class RandomUserManager
 		{
 			request = NSMutableURLRequest(URL: NSURL(string: urlString)!)
 		}
+		//	Set the HTTP Request method
 		request.HTTPMethod = "GET"
+		
 		
 		let urlSession = NSURLSession.sharedSession()
 		
-		print("Request is: \(request)")
-		
+		//	The main get action
+		//	Generate the appropriate data task request (doesn't perform the task yet)
 		let urlGetTask = urlSession.dataTaskWithRequest(request, completionHandler: {(data,response,error) -> Void in
 			//	Block within the function call to handle the data response
 			if error != nil
@@ -60,14 +76,21 @@ class RandomUserManager
 			}
 			else
 			{
-				print("Parse respones")
+				//	DEBUG PRINT:
+				//print("Parse respones")
+
+				//	If didn't generate an error, then parse the data
 				self.parseResponseData(data)
 				
 				if self.parentViewController != nil
 				{
-					print("Reload data")
+					// DEBUG PRINT:
+					//	print("Reload data")
+					
+					
 					// Make sure that we reload the data only on the main thread
 					// If don't dispatch the reload command to the main thread then the UI can become out of sync and may lead to crashing
+					// The NSURLSession runs automatically on the background thread, need to cal lthe response on the main thread (use Grand Central Dispatch dispatch_async) to do so.
 					dispatch_async(dispatch_get_main_queue(), {
 						self.parentViewController?.updateUsersData(self.usersResponse!)
 					})
@@ -76,9 +99,18 @@ class RandomUserManager
 			}
 			
 		})//	End of call to urlSession.dataTaskWithRequest
+		
+		//	Perform the actual get request
+		//	NSURLSession automatically runs on the background thread
 		urlGetTask.resume()
 	}
 	
+	
+	//	MARK: Parser
+	
+	//	Parse the data response
+	//	Assumes that all values can be optional
+	//	Uses the RandomUser API (documentation can be found at the link at the top of this class)
 	func parseResponseData(data: NSData?)
 	{
 		if(data != nil)
@@ -169,8 +201,9 @@ class RandomUserManager
 			}
 			catch
 			{
+				//	An error converting the data object to JSON
 				print("Error serializing \(error)")
 			}
-		}
-	}
+		}	//	End of check to make sure data is not nil
+	}	//	End of parsing
 }
